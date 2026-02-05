@@ -1,0 +1,353 @@
+{
+  "name": "Lab Calibration Scheduler",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "triggerAtDayOfMonth": 25,
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -112,
+        -96
+      ],
+      "id": "e489e6b8-f549-4a81-902e-6df9cc864cdb",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "1L-cyflUsa3BAX70zxbB4XiHWxVRaKZDjw0xBw4ukgwA",
+          "mode": "list",
+          "cachedResultName": "Monthly Calibration Schedule",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L-cyflUsa3BAX70zxbB4XiHWxVRaKZDjw0xBw4ukgwA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 403045760,
+          "mode": "list",
+          "cachedResultName": "Current_month_assignment",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L-cyflUsa3BAX70zxbB4XiHWxVRaKZDjw0xBw4ukgwA/edit#gid=403045760"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        976,
+        -128
+      ],
+      "id": "8815409d-75ab-4c86-91b2-9a1e0e010f32",
+      "name": "Clear sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qvAPvqcPzjO70W1d",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1L-cyflUsa3BAX70zxbB4XiHWxVRaKZDjw0xBw4ukgwA",
+          "mode": "list",
+          "cachedResultName": "Monthly Calibration Schedule",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L-cyflUsa3BAX70zxbB4XiHWxVRaKZDjw0xBw4ukgwA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Team_Qualifications",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L-cyflUsa3BAX70zxbB4XiHWxVRaKZDjw0xBw4ukgwA/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        -224
+      ],
+      "id": "cedac3ab-34d0-4c98-b0bc-98750b779d55",
+      "name": "Input Team Qualifications",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qvAPvqcPzjO70W1d",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1L-cyflUsa3BAX70zxbB4XiHWxVRaKZDjw0xBw4ukgwA",
+          "mode": "list",
+          "cachedResultName": "Monthly Calibration Schedule",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L-cyflUsa3BAX70zxbB4XiHWxVRaKZDjw0xBw4ukgwA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1728519652,
+          "mode": "list",
+          "cachedResultName": "Assignment_History",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L-cyflUsa3BAX70zxbB4XiHWxVRaKZDjw0xBw4ukgwA/edit#gid=1728519652"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        496,
+        -176
+      ],
+      "id": "d4cff925-45ef-4b2e-851a-0afd9a282a62",
+      "name": "Input history of test data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qvAPvqcPzjO70W1d",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// STEP 1: Get the data from previous nodes \n// =========================================\n// Get team qualifications from first node\nconst qualifications = $('Input Team Qualifications').all().map(item => item.json);\n\n// Get assignment history from the second node\nconst history = $('Input history of test data').all().map(item => item.json);\n\n// STEP 2: Define what tests need to be assigned\n// ==============================================\nconst tests = ['Moisture', 'Ash', 'Protein', 'Falling_Number', 'Farinograph', 'Amylograph'];\n\n// STEP 3: Compute next month (when assignments are due) \n// ======================================================\nconst today = new Date();\n\n// This changes to first day of the current month and adds 32 days\nlet next_month = new Date(today.getFullYear(), today.getMonth(), 1);\nnext_month.setDate(next_month.getDate() + 32);\n\n// New month is then converted to day 1\nnext_month = new Date(next_month.getFullYear(), next_month.getMonth(), 1);\n\n// And we change the date to a string format\nconst year = next_month.getFullYear();\nconst month = String(next_month.getMonth() + 1).padStart(2, '0');\nconst month_string = `${year}-${month}`;\n\nconsole.log(next_month);\nconsole.log(month_string);\n\n// STEP 4: Filter history to only the last 2 months \n// =================================================\n// We only want to get the recent assignments\n\nconst two_months_ago = new Date(today);\ntwo_months_ago.setMonth(today.getMonth() - 2); // More accurate for \"2 months\" than 60 days\n\nlet recent_history = history.filter(record => {\n    if (!record.Month) return false;\n    \n    const record_date = new Date(record.Month + '-01');\n    return record_date >= two_months_ago;\n});\n\nif (recent_history.length === 0) {\n    const months = history\n        .map(r => r.Month)\n        .filter(Boolean)\n        .filter((m, i, arr) => arr.indexOf(m) === i)\n        .sort((a, b) => new Date(b + '-01') - new Date(a + '-01'))\n        .slice(0, 2);\n\n    recent_history = history.filter(r => r.Month && months.includes(r.Month));\n}\n\n// STEP 5: Create assignments for each test \n// =========================================\nconst assignments = [];\nconst run_counts = {};\n\nfor (const test of tests) {\n    // This finds people qualified for this test (those with a YES)\n    const qualified_people = [];\n    for (const person of qualifications) {\n        if (person[test] === 'YES') {\n            qualified_people.push(person);\n        }\n    }\n    \n    // This removes people who did this test recently \n    const eligible_people = [];\n    for (const person of qualified_people) {\n        let did_recently = false;\n        for (const history_record of recent_history) {\n            if (history_record.Test === test && \n                history_record.Assigned_To === person.Name) {\n                did_recently = true;\n                break;\n            }\n        }\n        \n        if (!did_recently) {\n            eligible_people.push(person);\n        }\n    }\n    \n    // If everyone did it recently, just use qualified people \n    let pool;\n    if (eligible_people.length === 0) {\n        pool = qualified_people;\n    } else {\n        pool = eligible_people;\n    }\n    \n    // Balance workload: Count how many tests each person did recently  \n    const people_with_counts = [];\n    for (const person of pool) {\n        // Count how many assignments this person has in recent_history\n        let recent_count = 0;\n        for (const history_record of recent_history) {\n            if (history_record.Assigned_To === person.Name) {\n                recent_count += 1;\n            }\n        }\n\n        recent_count += (run_counts[person.Name] || 0);\n        \n        people_with_counts.push({\n            person: person,\n            recent_count: recent_count\n        });\n    }\n    \n    // Sort: person with FEWEST recent assignments goes first\n    people_with_counts.sort((a, b) => a.recent_count - b.recent_count);\n    \n    // Assign to the person with the least workload \n    const chosen_person = people_with_counts[0].person;\n    run_counts[chosen_person.Name] = (run_counts[chosen_person.Name] || 0) + 1;\n    \n    // Set due date to 15th of next month\n    const due_date = new Date(next_month.getFullYear(), next_month.getMonth(), 15);\n    const due_date_string = due_date.toISOString().split('T')[0];\n    \n    // Create the assignment for current month\n    assignments.push({\n        Test: test,\n        Assigned_To: chosen_person.Name,\n        Due_Date: due_date_string,\n        Status: 'Pending'\n    });\n}\n\n// STEP 6: Return assignments \n// ==========================\nreturn assignments.map(assignment => ({ json: assignment }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        -224
+      ],
+      "id": "ffd07c72-c903-43a4-802d-3ca75cde08e4",
+      "name": "Code Logic"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1L-cyflUsa3BAX70zxbB4XiHWxVRaKZDjw0xBw4ukgwA",
+          "mode": "list",
+          "cachedResultName": "Monthly Calibration Schedule",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L-cyflUsa3BAX70zxbB4XiHWxVRaKZDjw0xBw4ukgwA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 403045760,
+          "mode": "list",
+          "cachedResultName": "Current_month_assignment",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L-cyflUsa3BAX70zxbB4XiHWxVRaKZDjw0xBw4ukgwA/edit#gid=403045760"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Test",
+              "displayName": "Test",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Assigned_To",
+              "displayName": "Assigned_To",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Due_Date",
+              "displayName": "Due_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        736,
+        64
+      ],
+      "id": "fb7afee7-b69c-47c0-aa54-99bf5b6679a6",
+      "name": "Add monthly assignments",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qvAPvqcPzjO70W1d",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0AE3P8R21W",
+          "mode": "list",
+          "cachedResultName": "new-channel"
+        },
+        "text": "=Hey everyone, check out this month's Lab assignments!\nCreated for {{ $now.format(\"YYYY-MM\") }} ({{ $items().length }} tests). {{ $items().map(i => `• ${i.json.Test}: ${i.json.Assigned_To} (Due ${i.json.Due_Date})`).join('\\n') }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        208,
+        48
+      ],
+      "id": "343bd132-f017-4d81-b835-429eb415ac3c",
+      "name": "Send a message",
+      "webhookId": "6a4a3197-ac29-45b1-bce5-7fc868565c1d",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "qlwebEURNolWl9Mh",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2026-02-05T17:28:54.531-05:00",
+          "Readable date": "February 5th 2026, 5:28:54 pm",
+          "Readable time": "5:28:54 pm",
+          "Day of week": "Thursday",
+          "Year": "2026",
+          "Month": "February",
+          "Day of month": "05",
+          "Hour": "17",
+          "Minute": "28",
+          "Second": "54",
+          "Timezone": "America/New_York (UTC-05:00)"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Input Team Qualifications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear sheet": {
+      "main": [
+        [
+          {
+            "node": "Add monthly assignments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input Team Qualifications": {
+      "main": [
+        [
+          {
+            "node": "Input history of test data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input history of test data": {
+      "main": [
+        [
+          {
+            "node": "Code Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Logic": {
+      "main": [
+        [
+          {
+            "node": "Clear sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add monthly assignments": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "6d0ab932-52a0-4275-b5b2-740f150f0cdc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "df83aca1339749e08d679a70bcc7b6e981d0bc91a39d454e6477ff02901d723e"
+  },
+  "id": "mQol-JGQ8I8j4uw35apYK",
+  "tags": []
+}
