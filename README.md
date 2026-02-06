@@ -38,7 +38,7 @@ This workflow automates monthly calibration test scheduling using predefined bus
 
 `Trigger` → `Data Retrieval` → `Rule Engine` → `Schedule Generation` → `Sheet Update` → `Slack Alert`
 
-![Workflow Schema](images/schedule_workflow.png)
+![Workflow Schema](images/output/schedule_workflow.png)
 
 
 
